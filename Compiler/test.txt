@@ -1,0 +1,13 @@
+while $t1 < $t2
+    inc $t1
+whileend
+
+call $t0 hello $s0 $s2 #hello
+
+: hello
+spstore $s0 $s1 $s2 $s3 #hello who
+if $t0 < $t2
+    mv $t2 $t0
+ifend
+spload $s0 $s1 $s2 $s3 #mochi $mochi
+jal hello

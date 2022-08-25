@@ -1,0 +1,22 @@
+# FIBONACCI STORE
+
+
+lw .1 .0 0
+lw .2 .0 one
+lw .3 .0 sp
+lw .4 .0 one
+sw .1 .3 0
+: loop
+# Comment
+
+
+add .1 .1 .2
+sw .1 .3 0
+add .3 .3 .4
+add .2 .2 .1
+
+sw .2 .3 0
+add .3 .3 .4
+j loop
+const one 1
+const sp 32 

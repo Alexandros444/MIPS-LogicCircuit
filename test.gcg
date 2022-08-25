@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CircuitGroup Version="1.2">
+  <Circuit Name="MUX">
+    <Gates>
+      <Gate Type="UserInput" Name="A" ID="1">
+        <Point X="544" Y="704" Angle="0" />
+      </Gate>
+      <Gate Type="UserInput" Name="B" ID="2">
+        <Point X="544" Y="800" Angle="0" />
+      </Gate>
+      <Gate Type="UserOutput" Name="C" ID="3">
+        <Point X="1018.4596273291925" Y="765.81366459627327" Angle="0" />
+      </Gate>
+      <Gate Type="And" Name="And" ID="4" NumInputs="2">
+        <Point X="733.83850931677023" Y="783.22981366459624" Angle="0" />
+      </Gate>
+      <Gate Type="UserInput" Name="S" ID="5">
+        <Point X="544" Y="640" Angle="0" />
+      </Gate>
+      <Gate Type="And" Name="And" ID="6" NumInputs="2">
+        <Point X="736" Y="736" Angle="0" />
+      </Gate>
+      <Gate Type="Not" Name="Not" ID="7">
+        <Point X="672" Y="672" Angle="0" />
+      </Gate>
+      <Gate Type="Or" Name="Or" ID="8" NumInputs="2">
+        <Point X="864" Y="768" Angle="0" />
+      </Gate>
+    </Gates>
+    <Wires>
+      <Wire>
+        <From ID="8" Port="0" />
+        <To ID="3" Port="0" />
+      </Wire>
+      <Wire>
+        <From ID="2" Port="0" />
+        <To ID="4" Port="0" />
+      </Wire>
+      <Wire>
+        <From ID="5" Port="0" />
+        <To ID="4" Port="1" />
+      </Wire>
+      <Wire>
+        <From ID="1" Port="0" />
+        <To ID="6" Port="0" />
+      </Wire>
+      <Wire>
+        <From ID="7" Port="0" />
+        <To ID="6" Port="1" />
+      </Wire>
+      <Wire>
+        <From ID="5" Port="0" />
+        <To ID="7" Port="0" />
+      </Wire>
+      <Wire>
+        <From ID="4" Port="0" />
+        <To ID="8" Port="0" />
+      </Wire>
+      <Wire>
+        <From ID="6" Port="0" />
+        <To ID="8" Port="1" />
+      </Wire>
+    </Wires>
+  </Circuit>
+  <Circuit>
+    <Gates />
+    <Wires />
+  </Circuit>
+</CircuitGroup>

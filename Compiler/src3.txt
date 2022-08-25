@@ -1,0 +1,336 @@
+: func_Init
+    li $zero 0
+    li $at 0
+    li $v0 0
+    li $v1 0
+    li $a0 0
+    li $a1 0
+    li $a2 0
+    li $a3 0
+    li $t0 0
+    li $t1 0
+    li $t2 0
+    li $t3 0
+    li $t4 0
+    li $t5 0
+    li $t6 0
+    li $t7 0
+    li $s0 0
+    li $s1 0
+    li $s2 0
+    li $s3 0
+    li $s4 0
+    li $s5 0
+    li $s6 0
+    li $s7 0
+    li $t8 0
+    li $t9 0
+    li $k0 0
+    li $k1 0
+    li $gp 0
+    ladr $sp sp
+    li $fp 0xffff
+    li $ra 0
+    j func_main
+    
+: CONSTS
+    const scr0 0
+    const scr1 0
+    const scr2 0
+    const scr3 0
+    const scr4 0
+    const scr5 0
+    const scr6 0
+    const scr7 0
+    const scr8 0
+    const scr9 0
+    const scr10 0
+    const scr11 0
+    const scr12 0
+    const scr13 0
+    const scr14 0
+    const scr15 0
+    const scr16 0
+    const scr17 0
+    const scr18 0
+    const scr19 0
+    const scr20 0
+    const scr21 0
+    const scr22 0
+    const scr23 0
+    const scr24 0
+    const scr25 0
+    const scr26 0
+    const scr27 0
+    const scr28 0
+    const scr29 0
+    const scr30 0
+    const scr31 0
+    const px0 1
+    const px1 2
+    const px2 4
+    const px3 8
+    const px4 16
+    const px5 32
+    const px6 64
+    const px7 128
+    const px8 256
+    const px9 512
+    const px10 1024
+    const px11 2048
+    const px12 4096
+    const px13 8192
+    const px14 16384
+    const px15 32768
+    const px16 65536
+    const px17 131072
+    const px18 262144
+    const px19 524288
+    const px20 1048576
+    const px21 2097152
+    const px22 4194304
+    const px23 8388608
+    const px24 16777216
+    const px25 33554432
+    const px26 67108864
+    const px27 134217728   
+    const px28 268435456
+    const px29 536870912
+    const px30 1073741824
+    const px31 2147483648
+    const ppx 16
+    const ppy 29
+    const right 2   #linke kante
+    const left 8
+    const pwidth 3  #ist die richtige spielergröße, min 1
+    const pinp 0
+    const bullOffset 1 # spawn die bullex x felder weiter rechts
+    const bullx 0
+    const bully 0
+    const bullFired 0
+: func_main   
+    : game_loop
+        jal func_player_input
+        
+        jal func_update_player_movement
+        
+        jal func_update_player_shoot
+        
+        jal func_update_bullet_pos
+        
+        jal func_update_player_pos
+        
+        jal func_print_Screen
+        
+        j game_loop
+        
+
+    # enemy from above
+    # player shoot
+
+    j eof
+    
+
+: func_update_player_shoot
+    lw $t5 $zero pinp
+    andi $t5 $t5 1
+    li $t6 1
+    j if_shoot
+    
+        : shoot
+                # reload, max ammo
+        lw $t7 $zero bullFired
+        beq $t7 $t6 shoot_end
+        
+        # shoot bullet, with pos of player
+        li $t7 1
+        lw $t8 $zero ppx
+        lw $t0 $zero bullOffset
+        sub $t8 $t8 $t0
+        lw $t9 $zero ppy
+        sw $t7 $zero bullFired
+        sw $t8 $zero bullx
+        sw $t9 $zero bully
+
+        j shoot_end
+        
+    : if_shoot
+    beq $t5 $t6 shoot
+    
+    : shoot_end
+    jr $ra
+    
+
+: func_update_bullet_pos
+    sw $ra $sp 0
+    sw $s0 $sp 1
+    sw $s1 $sp 2
+    addi $sp $sp 3
+
+    lw $t6 $zero bullFired
+    beq $t6 $zero bullet_update_pos_end
+    
+    lw $s0 $zero bullx
+    lw $s1 $zero bully
+
+    # Arguemnte für erase bullet
+    mv $a0 $s0
+    mv $a1 $s1
+    lw $a2 $s1 scr0
+    # erase old bullet
+    jal func_fast_eraseXY
+    
+    # draw new bullet
+    dec $s1
+    mv $a0 $s0
+    mv $a1 $s1
+    lw $a2 $s1 scr0
+    li $t0 -1
+    beq $a1 $t0 bullet_off_screen
+    
+    jal func_fast_drawXY
+    
+    # store bullets position
+    sw $s0 $zero bullx
+    sw $s1 $zero bully
+    j bullet_update_pos_end
+    
+    : bullet_off_screen
+    sw $zero $zero bullFired
+    : bullet_update_pos_end
+    addi $sp $sp -3
+    lw $ra $sp 0
+    lw $s0 $sp 1
+    lw $s1 $sp 2
+    jr $ra
+    
+
+: func_player_input
+    lip $t0
+    sw $t0 $zero pinp
+    jr $ra
+    
+
+: func_update_player_movement
+    lw $t0 $zero left
+    lw $t1 $zero right
+    lw $t2 $zero pinp
+    j if_input_rightORleft
+    
+        : input_left
+            lw $t0 $zero ppx
+            inc $t0
+            j input_32_check    # overflow
+            
+                : input_is_32
+                dec $t0
+                j input_32_check_end
+                
+            : input_32_check
+            li $t1 32
+            beq $t0 $t1 input_is_32
+            
+            : input_32_check_end
+            sw $t0 $zero ppx
+            j if_input_end
+            
+        : input_right
+            lw $t0 $zero ppx
+            dec $t0
+            j input_-1_check    # underflow
+            
+                : input_is_-1
+                inc $t0
+                j input_-1_check_end
+                
+            : input_-1_check
+            lw $t1 $zero pwidth                    # check for pwidth, ist die spieler größe. wenn die position = spielergröße-1 == 0 alles ok, wenn position = -1, also position = spielergröße-2, -1=1-2=-1 dann ist underflow.
+            addi $t1 -2
+            beq $t0 $t1 input_is_-1
+            
+            : input_-1_check_end
+            sw $t0 $zero ppx
+            j if_input_end
+            
+    : if_input_rightORleft
+    # maske für nur left input und nur right input, shoot egal
+    andi $t3 $t2 8   #left
+    beq $t3 $t0 input_left
+    
+    andi $t3 $t2 2   #right
+    beq $t3 $t1 input_right
+    
+    : if_input_end
+    jr $ra
+    
+: func_update_player_pos
+    sw $ra $sp 0
+    sw $s0 $sp 1
+    sw $s1 $sp 2
+    addi $sp 3
+    lw $s0 $zero pwidth
+    lw $s1 $zero ppx
+    li $a2 0
+                # draw on top ? $a2
+    : width_loop
+        mv $a0 $s1
+        lw $a1 $zero ppy
+        jal func_fast_drawXY
+        
+        mv $a2 $v0
+        dec $s1
+        dec $s0
+    beq $s0 $zero width_loop_end
+        
+    j width_loop
+        
+    : width_loop_end
+    addi $sp -3
+    lw $ra $sp 0
+    lw $s0 $sp 1
+    lw $s1 $sp 2
+    jr $ra
+    
+: func_fast_drawXY    # Arguemnte $a0-X/$a1-Y/$a2-add, $v0 return, setzt nur register
+        # lade in $t0 den richtigen wert, mit $a0 als select "offset"
+    lw $t0 $a0 px0
+    or $t0 $t0 $a2
+        # X in $t0
+        # Store X in Y'tem speicher
+    sw $t0 $a1 scr0
+        # X als rückgabewert in $v0
+    mv $v0 $t0
+    jr $ra
+    
+: func_fast_eraseXY    # Arguemnte $a0-X/$a1-Y/$a2-add, $v0 return, setzt nur register
+        # lade in $t0 -1 also 111111 etc, lade in t1 den zu clearenden wert aus a0
+    li $t0 -1
+    lw $t1 $a0 px0
+    sub $t0 $t0 $t1
+    # and maske erstellt, a0 wurde daraus entfernt, bleibt noch a2
+    and $t0 $t0 $a2
+        # X in $t0
+        # Store X in Y'tem speicher
+    sw $t0 $a1 scr0
+        # X als rückgabewert in $v0
+    mv $v0 $t0
+    jr $ra
+    
+: func_print_Screen
+    li $t0 0
+    li $t1 31
+    : print_loop
+        lw $t2 $t0 scr0
+        dwr $t2 $t0
+        inc $t0
+        beq $t0 $t1 print_loop_end
+        
+        j print_loop
+        
+    : print_loop_end
+    jr $ra
+    
+: eof   
+    j eof
+    
+    : sp # Stack Pointer 29 points here
