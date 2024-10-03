@@ -10,7 +10,7 @@ cmds = [(":","","s"),("nop","","s"),("const","","s"),("lw","100011","i"),
         ("sw","101011","i"),("beq","000100","i"),("j","000010","j"),("add","000000","r","00000","100000"),
         ("and","000000","r","00000","100100"),("addi","001000","i"),("andi","001100","i"),
         ("or","000000","r","00000","100101"),("slt","000000","r","00000","101011"),
-        ("jal","000011","j"),("jr","000000","r","00000","001000"),("lip","010100","i"),
+        ("jal","000011","j"),("jr","000000","r","00000","001000"),("lip","010100","i"), # LIP Load Input
         ("dwr","010101","i"),("li","001000","i"),("mv","001000","i"),("inc","001000","i"),
         ("sub","000000","r","00000","100010"),("ladr","001000","i"),("dec","001000","i"),
         ("bne","000101","i"),("blt","","p"),("bgt","","p"),("bge","","p"),("ble","","p"),
@@ -345,6 +345,9 @@ def writeToFile(file, string):
 
 # Isoliert die command lines, argumente und struktur, löst pseudobefehle in richtige befehle auf, es bleiben nur const und label noch gleich
 def createCmdLines(cmd_t,args):
+    if not cmd_t:
+        
+        return []
     cmd = cmd_t[0]
     cmd_lines = []
     #Spezialbefehle
@@ -569,6 +572,7 @@ def passFile(src_file,dest_file):
     src_lines = []
     for line in src_file:
         src_lines.append(line)
+    assert src_lines, f"No Lines in File({src_file}) detected."
     #Get only the Commands of them
     code_lines = []
     for line in src_lines:
@@ -579,12 +583,12 @@ def passFile(src_file,dest_file):
             else:
                 code_lines.append(line[:])
     #Command-lines verarbeiten
+    assert code_lines, f"No Code Lines in File({src_file}) detected."
 
     cmd_lines = []
     #print("__Pre__")
     for line in code_lines:
-        for cmd_line in createCmdLines(getCommandOfLine(line),line.split()[1:]):
-            cmd_lines.append(cmd_line)
+        cmd_lines.extend(createCmdLines(getCommandOfLine(line),line.split()[1:]))
     print("__Consts__")
     for cmd in cmd_lines:
         passLineOfFile(cmd,True)
@@ -621,8 +625,8 @@ def passLineOfFile(cmd_t, is_reference):
 def main():
     global LINE_NUMBER
     LINE_NUMBER = 0
-    src_file = open("src3.txt","rt")
-    compiled_file = open("srcCompiled","wb")
+    src_file = open("srcTest.txt","rt")
+    compiled_file = open("srcTest","wb")
     passFile(src_file,compiled_file)
     src_file.close()
     compiled_file.close()

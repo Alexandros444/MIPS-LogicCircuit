@@ -1,0 +1,11 @@
+wanted Output Compiler
+
+Code                    Assembly                        Binary 
+
+1 while a != b:         
+    
+
+
+2 |   x = x + 1
+3 |   y = 2
+4 whileend
