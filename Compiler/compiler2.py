@@ -621,8 +621,8 @@ def passLineOfFile(cmd_t, is_reference):
 def main():
     global LINE_NUMBER
     LINE_NUMBER = 0
-    src_file = open("src3.txt","rt")
-    compiled_file = open("srcCompiled","wb")
+    src_file = open("src.txt","rt")
+    compiled_file = open("compiled2","wb")
     passFile(src_file,compiled_file)
     src_file.close()
     compiled_file.close()

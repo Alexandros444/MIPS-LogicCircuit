@@ -14,65 +14,6 @@ cmds = [(":","Label:","s"),("nop","0","s"),("#","Comment","s"),("","","s"),("con
         ("sub","000000","r","00000","100010"),("ladr","001000","i"),("dec","001000","i")]
         # nop unter jumps
 
-reg = [
-    ("$zero",0),
-    ("$at",1),
-    ("$v0",2),
-    ("$v1",3),
-    ("$a0",4),
-    ("$a1",5),
-    ("$a2",6),
-    ("$a3",7),
-    ("$t0",8),
-    ("$t1",9),
-    ("$t2",10),
-    ("$t3",11),
-    ("$t4",12),
-    ("$t5",13),
-    ("$t6",14),
-    ("$t7",15),
-    ("$s0",16),
-    ("$s1",17),
-    ("$s2",18),
-    ("$s3",19),
-    ("$s4",20),
-    ("$s5",21),
-    ("$s6",22),
-    ("$s7",23),
-    ("$t8",24),
-    ("$t9",25),
-    ("$k0",26),
-    ("$k1",27),
-    ("$gp",28),
-    ("$sp",29), # using it for function stack data starting at : end of static program data
-    ("$fp",30), # using it for dynamic data, starting at 0xffff, memory management required... argh
-    ("$ra",31)
-]
-
-# Memory Management:
-# Momory Block: Statisch mit Wortgröße 4 (4 * 32bit), als static gespeichert, um Vergößerung nachher easy zu machen!
-# wäre eher praktisch sich für gegner und bullets jewails statisch 32 structs zu alloziieren und in ner größeren struktur die dann die anzahl noch speicher zu verwalten
-#--block end--
-# 0x8 Data
-# 0x9 Data
-# 0xA Data
-# 0xB Free
-#--block start--
-#--block end--
-# 0xC Data
-# 0xD Data
-# 0xE Data
-# 0xF Free
-#--block start--
-
-
-
-
-def getReg(string):
-    for register in reg:
-        if(string == register[0]):
-            return register[1]
-    exit("Error Register: "+string+" not found.")
 
 def strToBin(string):
     data = array.array('B')
@@ -87,16 +28,6 @@ def int2bin(integer, digits):
     else:
         return bin(2**digits + integer)[2:]
 
-def numToInt(string):
-    if(not string):
-        exit("empty string")
-    if(len(string)<3):
-        return int(string,10)
-    if(string[:2] == "0b"):
-        return int(string,2)
-    if(string[:2] == "0x"):
-        return int(string,16)
-    return int(string)
 
 def inList(list,elem):
     for entry in list:
@@ -130,31 +61,31 @@ def passCommand(string, pos_comp,pos_src):
         result = cmd[1]
         if(cmd[2] == "r"):
             if(cmd[0]=="jr"):
-                result += int2bin(getReg(tokens[1]),5)+int2bin(0,10)+cmd[3]+cmd[4]
+                result += int2bin(int(tokens[1][1:]),5)+int2bin(0,10)+cmd[3]+cmd[4]
             else:
-                result += int2bin(getReg(tokens[2]),5)+int2bin(getReg(tokens[3]),5)+int2bin(getReg(tokens[1]),5)+cmd[3]+cmd[4]
+                result += int2bin(int(tokens[2][1:]),5)+int2bin(int(tokens[3][1:]),5)+int2bin(int(tokens[1][1:]),5)+cmd[3]+cmd[4]
         elif(cmd[2] == "i"):
             if(cmd[0]=="lw" or cmd[0]=="sw"):
-                posEntryInList = inList(consts,tokens[3])
-                if(posEntryInList != -1):
-                    result += int2bin(getReg(tokens[2]),5)+int2bin(getReg(tokens[1]),5)+int2bin(posEntryInList,16)
+                listPos = inList(consts,tokens[3])
+                if(listPos != -1):
+                    result += int2bin(int(tokens[2][1:]),5)+int2bin(int(tokens[1][1:]),5)+int2bin(int(listPos),16)
                 else:
                     #exit("Label not found "+tokens[3]+" at pos: "+str(pos_src))
-                    result += int2bin(getReg(tokens[2]),5)+int2bin(getReg(tokens[1]),5)+int2bin(numToInt(tokens[3]),16)    
+                    result += int2bin(int(tokens[2][1:]),5)+int2bin(int(tokens[1][1:]),5)+int2bin(int(tokens[3]),16)    
             elif(cmd[0] == "lip"):
-                result += int2bin(0,5)+int2bin(getReg(tokens[1]),5)+int2bin(0,16)
+                result += int2bin(0,5)+int2bin(int(tokens[1][1:]),5)+int2bin(0,16)
             elif(cmd[0] == "dwr"):
-                result += int2bin(getReg(tokens[2]),5)+int2bin(getReg(tokens[1]),5)+int2bin(0,16)
+                result += int2bin(int(tokens[2][1:]),5)+int2bin(int(tokens[1][1:]),5)+int2bin(0,16)
             elif(cmd[0] == "li"):
-                result += int2bin(0,5)+int2bin(getReg(tokens[1]),5)+int2bin(numToInt(tokens[2]),16)
+                result += int2bin(0,5)+int2bin(int(tokens[1][1:]),5)+int2bin(int(tokens[2]),16)
             elif(cmd[0] == "mv"):
-                result += int2bin(getReg(tokens[2]),5)+int2bin(getReg(tokens[1]),5)+int2bin(0,16)
+                result += int2bin(int(tokens[2][1:]),5)+int2bin(int(tokens[1][1:]),5)+int2bin(0,16)
             elif(cmd[0] == "inc"):
-                result += int2bin(getReg(tokens[1]),5)+int2bin(getReg(tokens[1]),5)+int2bin(1,16)
+                result += int2bin(int(tokens[1][1:]),5)+int2bin(int(tokens[1][1:]),5)+int2bin(1,16)
             elif(cmd[0] == "dec"):
-                result += int2bin(getReg(tokens[1]),5)+int2bin(getReg(tokens[1]),5)+int2bin(-1,16)
+                result += int2bin(int(tokens[1][1:]),5)+int2bin(int(tokens[1][1:]),5)+int2bin(-1,16)
             elif(cmd[0] == "ladr"):
-                result += int2bin(0,5)+int2bin(getReg(tokens[1]),5)
+                result += int2bin(0,5)+int2bin(int(tokens[1][1:]),5)
                 pos_label = inList(labels,tokens[2])
                 if(pos_label != -1):
                         #print("pos_comp "+str(pos_comp)+" pos_label "+str(pos_label))
@@ -162,11 +93,11 @@ def passCommand(string, pos_comp,pos_src):
                 else:
                     print("lable not found: "+tokens[2]+" pos "+str(pos_src))
             elif(cmd[0] == "addi" and len(tokens)==3):
-                result += int2bin(getReg(tokens[1]),5)+int2bin(getReg(tokens[1]),5)+int2bin(numToInt(tokens[2]),16)
+                result += int2bin(int(tokens[1][1:]),5)+int2bin(int(tokens[1][1:]),5)+int2bin(int(tokens[2]),16)
             else:
-                result += int2bin(getReg(tokens[2]),5)+int2bin(getReg(tokens[1]),5)+int2bin(numToInt(tokens[3]),16)
+                result += int2bin(int(tokens[2][1:]),5)+int2bin(int(tokens[1][1:]),5)+int2bin(int(tokens[3]),16)
         elif(cmd[2] == "ij"):
-            result += int2bin(getReg(tokens[2]),5)+int2bin(getReg(tokens[1]),5)
+            result += int2bin(int(tokens[2][1:]),5)+int2bin(int(tokens[1][1:]),5)
             pos_label = inList(labels,tokens[3])
             if(pos_label != -1):
                     jumpLengt = pos_label-pos_comp-2
@@ -176,17 +107,17 @@ def passCommand(string, pos_comp,pos_src):
                 print("lable not found: "+tokens[3]+" pos "+str(pos_src))
         elif(cmd[2] == "j"):
             if(inList(labels,tokens[1]) != -1):
-                    result += int2bin(inList(labels,tokens[1]),26)
+                    result += int2bin(int(inList(labels,tokens[1])),26)
             else:
                 print("lable not found: "+tokens[1]+" pos "+str(pos_src))
 
     space = ""
-    for i in range(0,100-len(string[:-1])-len(hex(pos_comp)[2:])):
+    for i in range(0,40-len(string[:-1])-len(str(pos_comp))):
         space = space+" "
     if(cmd[0] != ":"):
-        print("#"+hex(pos_comp)[2:]+": "+string[:-1]+space+"HEX: "+"{0:0>8X}".format(int(result, 2))+"   BIN: "+result)
+        print("#"+str(pos_comp)+": "+string[:-1]+space+"HEX: "+"{0:0>8X}".format(int(result, 2))+"   BIN: "+result)
     else:
-        print("#"+hex(pos_comp)[2:]+": "+string[:-1]+space+"HEX: "+"{0:0>8X}".format(int(int2bin(pos_comp,32), 2))+"   BIN: "+int2bin(pos_comp,32))
+        print("#"+str(pos_comp)+": "+string[:-1]+space+"HEX: "+"{0:0>8X}".format(int(int2bin(pos_comp,32), 2))+"   BIN: "+int2bin(pos_comp,32))
     return result
 
 
@@ -206,9 +137,9 @@ def passConstant(string,pos_comp,pos_src):
             exit("Double Lable "+tokens[1]+" at Line: %d" % pos_src)
         labels.append((tokens[1],pos_comp))
         space = ""
-        for i in range(0,100-len(string[:-1])-len(hex(pos_comp)[2:])):
+        for i in range(0,40-len(string[:-1])-len(str(pos_comp))):
             space = space+" "
-        print("#"+hex(pos_comp)[2:]+": "+string[:-1]+space+"HEX: "+"{0:0>8X}".format(int(int2bin(pos_comp,32), 2))+"   BIN: "+int2bin(pos_comp,32))
+        print("#"+str(pos_comp)+": "+string[:-1]+space+"HEX: "+"{0:0>8X}".format(int(int2bin(pos_comp,32), 2))+"   BIN: "+int2bin(pos_comp,32))
         return ":"
     elif(cmd[0] == "const"):
         constPos = inList(consts,tokens[1])
@@ -216,9 +147,9 @@ def passConstant(string,pos_comp,pos_src):
             exit("Double Constant "+tokens[1]+" at Line: %d" % pos_src)
         consts.append((tokens[1],pos_comp))
         space = ""
-        for i in range(0,100-len(string[:-1])-len(hex(pos_comp)[2:])):
+        for i in range(0,40-len(string[:-1])-len(str(pos_comp))):
             space = space+" "
-        print("#"+hex(pos_comp)[2:]+": "+string[:-1]+space+"HEX: "+"{0:0>8X}".format(int(int2bin(int(tokens[2]),32), 2))+"   BIN: "+int2bin(int(tokens[2]),32))
+        print("#"+str(pos_comp)+": "+string[:-1]+space+"HEX: "+"{0:0>8X}".format(int(int2bin(int(tokens[2]),32), 2)+"   BIN: "+int2bin(int(tokens[2]),32)))
         return "const"
     elif(cmd[0] == "" or cmd[0] == "#"):
         return ":"

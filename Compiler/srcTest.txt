@@ -1,0 +1,6 @@
+nop
+a0
+nop
+const px20 1048576
+sw $ra $sp 7
+lw $s1 $zero 3
